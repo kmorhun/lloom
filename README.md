@@ -1,3 +1,18 @@
+## LLooM Modifications and new setup:
+
+1. Clone the repo
+2. Create and activate a virtual environment with either conda or pip and make sure that you are using at least Python 3.10 in the environment
+3. run `pip install -r requirements.txt` in the `lloom` folder
+4. run `npm install` and `npm run dev` in the `lloom` folder. This builds the workbench, which is needed for the experiment notebooks. You can cancel the `npm run dev` process afterwards
+5. Create a `.env` file in  the `lloom` folder, and populate it with `OPENAI_API_KEY=<your key>`
+6. Create a `concept_logs` folder in the `lloom` folder. This will be where the outputs of lloom can be stored, should you want to 
+7. Get the `data` folder, with several xlsx files, from someone and add them at a top level to the `lloom` folder
+8. If you're using the `ipynb` files to test, make sure that your kernel in the jupyter notebook is set properly.
+
+## NOTES:
+- Keep "id_col" to the default, because the data does not have unique comment ids for each comment
+- Many of the tests in `old_tests.ipynb` are probably not returning what you think they should be returning, because the default prompts in prompts.py have been modified. There's definitely a way to modify the prompts a different way
+
 # LLooM
 
 <p align="">
