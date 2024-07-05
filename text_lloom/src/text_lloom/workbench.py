@@ -340,10 +340,11 @@ class lloom:
                 "synthesize": self.show_prompt("synthesize"),
             }
         else:
+            pass
             # Validate that prompts are formatted correctly
-            for step_name, prompt in custom_prompts.items():
-                if prompt is not None:
-                    self.validate_prompt(step_name, prompt)
+            # for step_name, prompt in custom_prompts.items():
+            #     if prompt is not None:
+            #         self.validate_prompt(step_name, prompt)
         
         # Run cost estimation
         self.estimate_gen_cost(params)
@@ -376,7 +377,7 @@ class lloom:
                 spinner.text = "Done"
                 spinner.ok("✅")
             if debug:
-                display(df_filtered)
+                print(df_filtered)
         else:
             # Just use original df to generate bullets
             self.df_filtered = self.in_df[[self.doc_id_col, self.doc_col]]
@@ -399,7 +400,7 @@ class lloom:
                 spinner.text = "Done"
                 spinner.ok("✅")
             if debug:
-                display(df_bullets)
+                print(df_bullets)
         else:
             # Just use filtered df to generate concepts
             self.df_bullets = self.df_filtered
@@ -416,6 +417,7 @@ class lloom:
             self.print_step_name(step_name)
             with self.spinner_wrapper() as spinner:
                 df_cluster = await cluster(
+                    min_cluster_size=3,
                     text_df=df_cluster_in, 
                     doc_col=synth_doc_col,
                     doc_id_col=self.doc_id_col,
@@ -425,7 +427,7 @@ class lloom:
                 spinner.text = "Done"
                 spinner.ok("✅")
             if debug:
-                display(df_cluster)
+                print(df_cluster)
             
             step_name = "Synthesize"
             self.print_step_name(step_name)
@@ -442,6 +444,7 @@ class lloom:
                     seed=seed,
                     sess=self,
                     return_logs=True,
+                    verbose=True
                 )
                 spinner.text = "Done"
                 spinner.ok("✅")
