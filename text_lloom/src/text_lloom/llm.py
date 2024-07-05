@@ -35,6 +35,7 @@ RATE_LIMITS = {
     # https://platform.openai.com/account/limits
     # (n_requests, wait_time_secs)
     "gpt-3.5-turbo": (300, 10),  # = 300*6 = 1800 rpm
+    "gpt-3.5-turbo-0125": (300, 10),  # = 300*6 = 1800 rpm
     "gpt-4": (20, 10),  # = 20*6 = 120 rpm
     "gpt-4-turbo-preview": (20, 10),  # = 20*6 = 120 rpm
     "gpt-4-turbo": (20, 10),  # = 20*6 = 120 rpm
@@ -45,6 +46,7 @@ CONTEXT_WINDOW = {
     # https://platform.openai.com/docs/models
     # Total tokens shared between input and output
     "gpt-3.5-turbo": 16385,  # Max 4096 output tokens
+    "gpt-3.5-turbo-0125": 16385,  # Max 4096 output tokens
     "gpt-4": 8192,
     "gpt-4-turbo-preview": 128000,  # Max 4096 output tokens
     "gpt-4-turbo": 128000,  # Max 4096 output tokens
@@ -54,6 +56,7 @@ CONTEXT_WINDOW = {
 COSTS = {
     # https://openai.com/pricing
     "gpt-3.5-turbo": [0.0005/1000, 0.0015/1000],
+    "gpt-3.5-turbo-0125": [0.0005/1000, 0.0015/1000],
     "gpt-4": [0.03/1000, 0.06/1000],
     "gpt-4-turbo-preview": [0.01/1000, 0.03/1000],
     "gpt-4-turbo": [0.01/1000, 0.03/1000],
@@ -213,10 +216,12 @@ async def multi_query_gpt_wrapper(prompt_template, arg_dicts, model_name, rate_l
         rate_limits = RATE_LIMITS  # Use default values
 
     if not batched:
+        print("Non-batched version")
         # Non-batched version
         tasks = [multi_query_gpt(model_name, prompt_template, args, temperature=temperature) for args in arg_dicts]
     else:
         # Batched version
+        print("Batched version")
         n_requests, wait_time_secs = rate_limits[model_name]
         tasks = []
         arg_dict_batches = [arg_dicts[i:i + n_requests] for i in range(0, len(arg_dicts), n_requests)]
@@ -233,6 +238,7 @@ async def multi_query_gpt_wrapper(prompt_template, arg_dicts, model_name, rate_l
     res_full = await asyncio.gather(*tasks)
 
     res_text = process_results(res_full)
+    print("res_text", res_text)
     return res_text, res_full
 
 def get_embeddings(embed_model_name, text_vals):

@@ -6,7 +6,7 @@ import uuid
 
 # CONCEPT class ================================
 class Concept:
-    def __init__(self, name, prompt, example_ids, active, summary=None, seed=None):
+    def __init__(self, name, prompt, example_ids, active, summary=None, seed=None, members=None):
         concept_id = str(uuid.uuid4())
         self.id = concept_id
         self.name = name
@@ -15,6 +15,7 @@ class Concept:
         self.active = active
         self.summary = summary
         self.seed = seed
+        self.members = members
 
     def to_dict(self):
         return {
@@ -24,5 +25,6 @@ class Concept:
             "example_ids": list(self.example_ids),
             "active": self.active,
             "summary": self.summary,
-            "seed": self.seed
+            "seed": self.seed,
+            "members": self.members
         }

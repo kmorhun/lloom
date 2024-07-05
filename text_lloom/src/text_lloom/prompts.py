@@ -15,10 +15,11 @@ summarize_prompt = """
 I have the following TEXT EXAMPLE:
 {ex}
 
-Please summarize the main point of this EXAMPLE {seeding_phrase} into {n_bullets} bullet points, where each bullet point is a {n_words} word phrase. Please respond ONLY with a valid JSON in the following format:
+Please extract the central explicit or implied CLAIMS or ARGUMENTS of this TEXT EXAMPLE into bullet points, where each bullet point is a {n_words} word phrase. Please respond ONLY with a valid JSON in the following format:
 {{
     "bullets": [ "<BULLET_1>", "<BULLET_2>", ... ]
 }}
+If the text does not contain any central CLAIMS or ARGUMENTS, please leave the list empty.
 """
 
 # Synthesize ========================
@@ -26,12 +27,9 @@ synthesize_prompt = """
 I have this set of bullet point summaries of text examples:
 {examples}
 
-Please write a summary of {n_concepts_phrase} for these examples. {seeding_phrase} For each high-level pattern, write a 2-4 word NAME for the pattern and an associated 1-sentence ChatGPT PROMPT that could take in a new text example and determine whether the relevant pattern applies. Also include 1-2 example_ids for items that BEST exemplify the pattern. Please respond ONLY with a valid JSON in the following format:
+Please identify ONLY ONE underlying CLAIM or ARGUMENT shared among these summaries. Write a 3-6 word NAME for the CLAIM or ARGUMENT and an associated 1-sentence ChatGPT PROMPT that could take in a new text example and determine whether the relevant CLAIM or ARGUMENT applies. Also include 1-2 example_ids for items that BEST exemplify the CLAIM or ARGUMENT. Please respond ONLY with a valid JSON in the following format:
 {{
-    "patterns": [ 
-        {{"name": "<PATTERN_NAME_1>", "prompt": "<PATTERN_PROMPT_1>", "example_ids": ["<EXAMPLE_ID_1>", "<EXAMPLE_ID_2>"]}},
-        {{"name": "<PATTERN_NAME_2>", "prompt": "<PATTERN_PROMPT_2>", "example_ids": ["<EXAMPLE_ID_1>", "<EXAMPLE_ID_2>"]}},
-    ]
+    "patterns": [{{"name": "<CLAIM_NAME>", "prompt": "<CLAIM_PROMPT>", "example_ids": ["<EXAMPLE_ID_1>", "<EXAMPLE_ID_2>"]}}]
 }}
 """
 

@@ -243,6 +243,9 @@ async def distill_summarize(text_df, doc_col, doc_id_col, model_name, n_bullets=
     res_text, res_full = await multi_query_gpt_wrapper(prompt_template, arg_dicts, model_name, rate_limits=rate_limits)
 
     # Process results
+    print("processing distill summarize llm results")
+    print("all_ex_ids:", all_ex_ids)
+    print("res_text:", res_text)
     for ex_id, res in zip(all_ex_ids, res_text):
         cur_bullets_list = json_load(res, top_level_key="bullets")
         if cur_bullets_list is not None:
@@ -252,6 +255,7 @@ async def distill_summarize(text_df, doc_col, doc_id_col, model_name, n_bullets=
     bullet_df = pd.DataFrame(rows, columns=[doc_id_col, doc_col])
 
     save_progress(sess, bullet_df, step_name="Distill-summarize", start=start, res=res_full, model_name=model_name)
+    print("bullet_df:", bullet_df)
     return bullet_df
 
 
@@ -379,6 +383,13 @@ async def synthesize(cluster_df, doc_col, doc_id_col, model_name, cluster_id_col
     for cur_cluster_id, res in zip(cluster_ids, res_text):
         cur_concepts = json_load(res, top_level_key="patterns")
         if cur_concepts is not None:
+            # Print intermediate results
+            print("this cluster df:", cluster_dfs[cur_cluster_id])
+            examples = cluster_dfs[cur_cluster_id][doc_col].tolist()
+            print("examples:", examples)
+            member_ids = cluster_dfs[cur_cluster_id][doc_id_col].tolist()
+            member_ids = set(member_ids) # remove duplicates
+            print("member_ids:", member_ids)
             for concept_dict in cur_concepts:
                 ex_ids = concept_dict["example_ids"]
                 ex_ids = set(ex_ids) # remove duplicates
@@ -387,7 +398,8 @@ async def synthesize(cluster_df, doc_col, doc_id_col, model_name, cluster_id_col
                     prompt=concept_dict["prompt"],
                     example_ids=ex_ids,
                     active=False,
-                    seed=seed_label
+                    seed=seed_label,
+                    members=member_ids
                 )
                 concepts[concept.id] = concept
                 
@@ -397,8 +409,6 @@ async def synthesize(cluster_df, doc_col, doc_id_col, model_name, cluster_id_col
                     if cur_key in ex_id_to_ex:
                         row = [ex_id, ex_id_to_ex[cur_key], concept.id, concept.name, concept.prompt, concept.seed]
                         rows.append(row)
-            # Print intermediate results
-            examples = cluster_dfs[cur_cluster_id][doc_col].tolist()
             concepts_formatted = pretty_print_dict_list(cur_concepts)
             cur_log = f"\n\nInput examples: {examples}\nOutput concepts: {concepts_formatted}"
             logs += cur_log
@@ -580,12 +590,19 @@ async def review_merge(concepts, concept_df, concept_col_prefix, model_name, ses
             if c is not None:
                 c_ids_to_remove.append(c_id)
                 merged_example_ids.extend(c.example_ids)
+
+        merged_member_ids = set()
+        for orig_concept in orig_concepts:
+            c_id, c = get_concept_by_name(concepts, orig_concept)
+            if c is not None:
+                c_ids_to_remove.append(c_id)
+                merged_member_ids.union(c.members)
         
         # Create new merged concept in dict
         new_concept_name = merge_result["merged_theme_name"]
         new_concept_prompt = merge_result["merged_theme_prompt"]
         new_concept_id = str(uuid.uuid4())
-        concepts[new_concept_id] = Concept(name=new_concept_name, prompt=new_concept_prompt, example_ids=merged_example_ids, active=False)
+        concepts[new_concept_id] = Concept(name=new_concept_name, prompt=new_concept_prompt, example_ids=merged_example_ids, active=False, members=merged_example_ids)
 
         # Replace prior df row with new merged concept
         if concept_df is not None:
