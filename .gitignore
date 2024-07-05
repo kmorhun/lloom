@@ -2,3 +2,5 @@ node_modules
 .env
 data
 concept_logs
+__pycache__
+text_lloom/src/text_lloom/static/*
